@@ -4,16 +4,25 @@ services:
       context: .
       dockerfile: Dockerfile
     image: resume-matcher
-    container_name: resume-matcher
+
     ports:
-      - "3001:3000"   # Frontend
-      - "8001:8000"   # Backend API
+      # Public ports (host:container)
+      - "${PUBLIC_FRONTEND_PORT:?3001}:3000"   # Frontend
+      - "${PUBLIC_BACKEND_PORT:?8001}:8000"    # Backend API
+
     volumes:
       - resume-data:/app/backend/data
+
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=http://localhost:8000
+
+      # Configurable in Coolify UI (required-with-default)
+      # Set this to your public API URL (NOT localhost from the user's browser)
+      # e.g. https://your-domain.com OR https://api.your-domain.com
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:?http://localhost:8001}
+
     restart: unless-stopped
+
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
       interval: 30s
